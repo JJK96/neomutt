@@ -226,6 +226,20 @@ struct KeyEvent mutt_getch(void)
     return timeout;
   }
 
+  /* in case of stand-alone Esc */
+  if (ch == '\033') {
+    int tmpto = MuttGetchTimeout;
+    mutt_getch_timeout(50);
+    ret = mutt_getch();
+    mutt_getch_timeout(tmpto);
+
+    if (ret.ch == -2) {
+      return err;
+    }
+
+    mutt_unget_event(ret.ch, ret.op);
+  }
+
   if ((ch & 0x80) && C_MetaKey)
   {
     /* send ALT-x as ESC-x */
